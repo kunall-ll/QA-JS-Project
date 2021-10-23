@@ -8,15 +8,39 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>
-        HR Application
-    </h1>
-    <div>
-        <ul id="employees">
+  <h1>
+  HR Application
+</h1>
 
-        </ul>
+  <button id="addEmployee">
+    Add Employee
+  </button>
+  
+<div class="main">
+
+  <table id="employees">
+  </table>
+
+  <div id="addModal" class="modal">
+    <div class="modal-content">
+        
+
+        
+        <input required type="text" placeholder="NI Number" name="NiNumber">
+        <input required type="text" placeholder="Full Name" name="Full Name">
+        <input required type="tel" placeholder="Phone Number" name="Phone Number">
+        <input required type="text" placeholder="Address" name="Address">
+        <input required type="text" placeholder="Department" name="Department">
+
+        <button id="saveEmployee">
+          Save Employee
+        </button>
+        
     </div>
-    <script src="/data.js"></script>
+  </div>
+
+</div>
+    <!-- <script src="/data.js"></script> -->
     <script src="/main.js"></script>
 </body>
 </html>
