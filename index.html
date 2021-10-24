@@ -1,46 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HR Application</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR Application</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,400,600,700&amp;lang=en" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
-  <h1>
-  HR Application
-</h1>
-
-  <button id="addEmployee">
-    Add Employee
-  </button>
-  
-<div class="main">
-
-  <table id="employees">
-  </table>
+  <h1 class="title">
+    HR Management System
+  </h1>
 
   <div id="addModal" class="modal">
     <div class="modal-content">
-        
+      <input required type="text" placeholder="NI Number" name="NiNumber">
+      <input required type="text" placeholder="Full Name" name="Full Name">
+      <input required type="tel" placeholder="Phone Number" name="Phone Number">
+      <input required type="text" placeholder="Address" name="Address">
+      <input required type="text" placeholder="Department" name="Department">
 
-        
-        <input required type="text" placeholder="NI Number" name="NiNumber">
-        <input required type="text" placeholder="Full Name" name="Full Name">
-        <input required type="tel" placeholder="Phone Number" name="Phone Number">
-        <input required type="text" placeholder="Address" name="Address">
-        <input required type="text" placeholder="Department" name="Department">
+      <button id="saveEmployee">
+        Save Employee
+      </button>
 
-        <button id="saveEmployee">
-          Save Employee
-        </button>
-        
     </div>
   </div>
 
-</div>
-    <!-- <script src="/data.js"></script> -->
-    <script src="/main.js"></script>
+  <div class="main">
+    <div class="blackout"></div>
+
+    <div class="toolbar">
+      <span></span>
+      <input type="text" placeholder="Search by name">
+      <button id="addEmployee">
+        Add Employee
+        <span class="material-icons-outlined">
+          person_add_alt
+        </span>
+      </button>
+    </div>
+
+    <table class="table" id="employees">
+    </table>
+
+  </div>
+  <!-- <script src="/data.js"></script> -->
+  <script src="/main.js"></script>
+
+
 </body>
+
 </html>
