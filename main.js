@@ -1,142 +1,201 @@
-var employeeData = [{
-        "NI Number": "SC460395",
-        "Full Name": "Clark Kent",
-        "Phone Number": "+44 7700 900472",
-        Address: "344 Clinton Street, Metropolis",
-        Department: "Superhero",
-    },
-    {
-        "NI Number": "LP562560",
-        "Full Name": "Harley Quinn",
-        "Phone Number": "+44 7700 900902",
-        Address: "93 Timm Street, Little Santa Prisca",
-        Department: "Villain",
-    },
-    {
-        "NI Number": "EY626528",
-        "Full Name": "Peter Parker",
-        "Phone Number": "+44 7700 900309",
-        Address: "8839 69th Road, Central Queens",
-        Department: "Superhero",
-    },
+var employeeData = [
+  {
+    "NI Number": "SC460395",
+    "Full Name": "Clark Kent",
+    "Phone Number": "+44 7700 900472",
+    Address: "344 Clinton Street, Metropolis",
+    Department: "Superhero",
+  },
+  {
+    "NI Number": "LP562560",
+    "Full Name": "Harley Quinn",
+    "Phone Number": "+44 7700 900902",
+    Address: "93 Timm Street, Little Santa Prisca",
+    Department: "Villain",
+  },
+  {
+    "NI Number": "EY626528",
+    "Full Name": "Peter Parker",
+    "Phone Number": "+44 7700 900309",
+    Address: "8839 69th Road, Central Queens",
+    Department: "Superhero",
+  },
 ];
 
-const employees = function () {
-    let controls;
-    let rowIndex = -1;
+const employees = (function () {
+  let controls;
+  let rowIndex = -1;
 
-    function init() {
-        _setupControls();
-        _bindEvents();
-        _setupTable();
+  function init() {
+    _setupControls();
+    _bindEvents();
+    _setupTable();
+    _filterDepartments();
+  }
+
+  function _setupControls() {
+    controls = {
+      table: document.getElementById("employees"),
+      addEmployee: document.getElementById("addEmployee"), // button
+      saveEmployee: document.getElementById("saveEmployee"), // save employee button on modal
+      departmentSelect: document.getElementById("departmentSelect"),
+    };
+  }
+
+  function _filterDepartments() {
+    const departments = [
+      ...new Set(employeeData.map((employee) => employee.Department)),
+    ];
+
+    for (let index = 0; index < departments.length; index++) {
+      const department = departments[index];
+
+      controls.departmentSelect.innerHTML += `<option id="${department}" value="${department}">${department}</option`;
     }
-    function _setupControls() {
-        controls = { //centralised object for mapping add employee and save employee
-            table: document.getElementById("employees"),
-            addEmployee: document.getElementById("addEmployee"),
-            saveEmployee: document.getElementById("saveEmployee"),
-        };
-    }
 
-    function _bindEvents() {
-        // document.getElementbyId("addEmployee").addEventListener("click", _openAddEmployeeModal); 
-        controls.addEmployee.addEventListener("click", _openAddEmployeeModal);
+    console.log(departments);
+  }
 
-        controls.saveEmployee.addEventListener("click", _submitAddEmployeeModal);
-    }
-
+  function _bindEvents() {
+    controls.addEmployee.addEventListener("click", () => {
+      _openAddEmployeeModal();
+    });
     
-    function _setupTable() {
-        let tr = controls.table.insertRow(rowIndex); //table row is made
-        let action = document.createElement("th"); //action needs to exist on every employee
-        rowIndex++;
+    controls.departmentSelect.addEventListener("change", () => {
+      if (controls.departmentSelect.value != "") {
+        // console.log(controls.departmentSelect.value);
+        _setupTable(controls.departmentSelect.value);
+      }
+    });
+  }
 
-        for (let key in employeeData[0]) { //however many keys there are in the JSON object, create a table header and that table header should include the value 
-            let th = document.createElement("th");
-            th.innerHTML = key; 
-            tr.appendChild(th); //add the value into the table row
-        }
+  function _setupTable(filter) {
+    let newRow = controls.table.insertRow(rowIndex);
+    let action = document.createElement("th");
+    rowIndex++;
 
-        action.classList.add("actions");
-        action.innerHTML = "Actions";
-        tr.appendChild(action);
-
-        for (let i = 0; i < employeeData.length; i++) { //for however many employees there are, creates a table data element
-            let row = controls.table.insertRow(++rowIndex);
-
-            for (var key in employeeData[i]) {
-                let td = document.createElement("td");
-                td.innerHTML = employeeData[i][key];
-                row.appendChild(td); //put the table data in the respective row
-            }
-
-            _addActionButtons(row, rowIndex);
-        }
+    for (let key in employeeData[0]) {
+      let headerCell = document.createElement("th");
+      headerCell.innerHTML = key;
+      newRow.appendChild(headerCell);
     }
 
-    function _deleteEmployee(index) {
-        employeeData.splice(index, 1); //deletes from the JSON object
-        rowIndex--;
+    action.classList.add("actions");
+    action.innerHTML = "Actions";
+    newRow.appendChild(action);
 
-        var rowToDelete = document.getElementsByTagName("tr")[index]; //specifies a row to delete
-        rowToDelete.remove(); //directly removes the row
+    for (let i = 0; i < employeeData.length; i++) {
+      let row = controls.table.insertRow(++rowIndex);
+      for (var key in employeeData[i]) {
+        let dataCell = document.createElement("td");
+        dataCell.innerHTML = employeeData[i][key];
+        row.appendChild(dataCell);
+      }
+
+      _addActionButtons(row, rowIndex);
+    }
+  }
+
+  function _addActionButtons(row, index) {
+    let action = document.createElement("td"),
+      deleteID = `delete_${index}`,
+      editID = `edit_${index}`;
+
+    action.classList.add("actions");
+    action.innerHTML = `<span class='material-icons-outlined actionBtn' id="${deleteID}">delete</span>`;
+    action.innerHTML += `<span class='material-icons-outlined actionBtn' data-edit="${index}" id="${editID}">edit</span>`;
+    row.appendChild(action);
+
+    document.getElementById(deleteID).addEventListener("click", function () {
+      _deleteEmployee(index);
+    });
+    document.getElementById(editID).addEventListener("click", function () {
+      _editEmployee(index);
+    });
+  }
+
+  function _deleteEmployee(index) {
+    employeeData.splice(index, 1);
+    rowIndex--;
+
+    var rowToDelete = document.getElementsByTagName("tr")[index];
+    rowToDelete.remove();
+  }
+
+  function _editEmployee(index) {
+    var thisEmployee = employeeData[index - 1];
+
+    let NiNumber = document.getElementsByName("NiNumber")[0],
+      FullName = document.getElementsByName("Full Name")[0],
+      PhoneNumber = document.getElementsByName("Phone Number")[0],
+      Address = document.getElementsByName("Address")[0],
+      Department = document.getElementsByName("Department")[0];
+
+    NiNumber.value = thisEmployee["NI Number"];
+    FullName.value = thisEmployee["Full Name"];
+    PhoneNumber.value = thisEmployee["Phone Number"];
+    Address.value = thisEmployee["Address"];
+    Department.value = thisEmployee["Department"];
+
+    _openAddEmployeeModal(index);
+  }
+
+  function _openAddEmployeeModal(index) {
+    //   let blackout = document.getElementsByClassName("blackout")[0];
+    //   let main = document.getElementsByClassName("main")[0];
+    //   main.classList.add("main--blackout");
+    //   blackout.classList.add("blackout--show");
+    let modal = document.getElementById("addModal");
+    modal.classList.toggle("modal--open");
+
+    controls.saveEmployee.addEventListener("click", () => {
+      _submitAddEmployeeModal(index);
+    });
+  }
+
+  function _addRow(employee) {
+    let tr = controls.table.insertRow();
+    rowIndex++;
+
+    for (var key in employee) {
+      let td = document.createElement("td");
+      td.innerHTML = employee[key];
+      tr.appendChild(td);
     }
 
-    function _editEmployee(index) {
-        console.log(`Edit Employee ${index}`);
+    _addActionButtons(tr, rowIndex);
+  }
+
+  function _submitAddEmployeeModal(editIndex) {
+    document.getElementById("addModal").classList.toggle("modal--open");
+    let NiNumber = document.getElementsByName("NiNumber")[0],
+      FullName = document.getElementsByName("Full Name")[0],
+      PhoneNumber = document.getElementsByName("Phone Number")[0],
+      Address = document.getElementsByName("Address")[0],
+      Department = document.getElementsByName("Department")[0];
+
+    var employee = {
+      "NI Number": NiNumber.value,
+      "Full Name": FullName.value,
+      "Phone Number": PhoneNumber.value,
+      Address: Address.value,
+      Department: Department.value,
+    };
+
+    if (typeof editIndex == "number") {
+      employeeData[editIndex - 1] = employee;
+    } else {
+      employeeData.push(employee);
+      _addRow(employee);
     }
 
-    function _addActionButtons(row, index) {
-        let action = document.createElement("td"), //creates table data tag
-            deleteID = `delete_${index}`,//IDs set based on the entry's index
-            editID = `edit_${index}`;
+    document.querySelectorAll("tr").forEach(function (e) {
+      e.remove();
+    });
 
-        action.classList.add("actions"); //adding the CSS class since the entire table is populated in JS
-        action.innerHTML = `<span class='material-icons-outlined actionBtn' id="${deleteID}">delete</span>`; //uses google material icons for delete
-        action.innerHTML += `<span class='material-icons-outlined actionBtn' id="${editID}">edit</span>`; //the same as above, but for edit
-        row.appendChild(action);
-//Tells the JS to react to any clicks on the edit or delete icons
-        document.getElementById(deleteID).addEventListener("click", function() { _deleteEmployee(index)}); //calls delete employee function with whatever index from the JSON object
-        document.getElementById(editID).addEventListener("click", function() { _editEmployee(index)});
-    }
+    rowIndex = -1;
+    _setupTable();
+  }
 
-    function _addRow(employee) { //puts a new row in and increments the index
-        let tr = controls.table.insertRow();
-        rowIndex++;
-    
-        for (var key in employee) {
-            let td = document.createElement("td");
-            td.innerHTML = employee[key];
-            tr.appendChild(td);
-        }
-
-        _addActionButtons(tr, rowIndex); //creates new action buttons (edit and delete) for the new rows
-    }
-
-    function _submitAddEmployeeModal() {
-        document.getElementById("addModal").classList.toggle("modal--open"); 
-        
-        var employee = { //initialises input fields for new employee when modal is toggled
-            "NI Number": document.getElementsByName("NiNumber")[0].value,
-            "Full Name": document.getElementsByName("Full Name")[0].value,
-            "Phone Number": document.getElementsByName("Phone Number")[0].value,
-            Address: document.getElementsByName("Address")[0].value,
-            Department: document.getElementsByName("Department")[0].value,
-        };
-    
-        employeeData.push(employee);
-        _addRow(employee);
-    }
-
-    function _openAddEmployeeModal() {
-        let modal = document.getElementById("addModal");
-        // let blackout = document.getElementsByClassName("blackout")[0];
-        // let main = document.getElementsByClassName("main")[0];
-        // main.classList.add("main--blackout");
-        // blackout.classList.add("blackout--show");
-        modal.classList.toggle("modal--open");
-    }
-
-    init(); //Initialises all functions
-
-}();
+  init();
+})();
