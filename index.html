@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR Application</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,600,700&amp;lang=en" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+  <h1 class="title">
+    HR Management System
+  </h1>
+
+  <div id="addModal" class="modal">
+    <div class="modal-content">
+      <input required type="text" placeholder="NI Number" id="niNumber">
+      <input required type="text" placeholder="Full Name" id="fullName">
+      <input required type="tel" placeholder="Phone Number" id="phoneNumber">
+      <input required type="text" placeholder="Address" id="address">
+      <input required type="text" placeholder="Department" id="department">
+
+      <button id="saveEmployee">
+        Save Employee
+      </button>
+
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="blackout"></div>
+
+    <div class="toolbar">
+      <span></span>
+      <select id="departmentSelect">
+        <option></option>
+      </select>
+      <button id="addEmployee">
+        Add Employee
+        <span class="material-icons-outlined">
+          person_add_alt
+        </span>
+      </button>
+    </div>
+
+    <table class="table" id="employees">
+    </table>
+
+  </div>
+  <!-- <script src="/data.js"></script> -->
+  <script src="main.js"></script>
+</body>
+
+</html>
