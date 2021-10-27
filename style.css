@@ -1,5 +1,4 @@
 :root {
-    /* Applies to the entire web structure */
     /* spacing */
     --spacing: 1rem;
     --spacing-half: 0.5rem;
@@ -15,7 +14,6 @@
     --colour-primary: #5F30E2;
     --colour-light: #AEAFC5;
     --colour-white: #ffffff;
-    /* Easier to change colours through this variable if needed */
     --colour-background: #EFEFF1;
 
 
@@ -26,7 +24,6 @@
 }
 
 * {
-    /* The following applies to everything on the screen */
     font-family: 'Roboto';
     box-sizing: border-box;
     margin: 0;
@@ -36,7 +33,6 @@
 
 body {
     font-size: var(--font);
-    /* Called the font variable from line 9-11 */
     height: 100vh;
     background-color: var(--colour-white);
     position: relative;
@@ -53,11 +49,13 @@ button {
     border: var(--border-button);
     background-color: var(--colour-white);
     display: flex;
+    justify-content: center;
     align-items: center;
+    height: 3.5rem;
 }
 
 button span {
-    margin-left: var(--spacing-half);
+    margin-right: var(--spacing-half);
 }
 
 button:hover,
@@ -89,15 +87,16 @@ button:active {
     column-gap: var(--spacing);
 }
 
-.toolbar input {
+select {
     height: 100%;
     outline: none;
-    border: none;
-    border-bottom: var(--border-light);
+    padding: var(--spacing);
+    border: var(--border-light);
+    font-size: var(--font);
+    border-radius: var(--border-radius);
 }
 
 th {
-    /* Table header */
     padding: var(--spacing) var(--spacing-half);
     font-size: var(--font-small);
     text-transform: uppercase;
@@ -165,16 +164,15 @@ table {
 
 .modal {
     z-index: 1;
-    /* display: block; */
     display: none;
     position: absolute;
     min-width: 400px;
-    min-height: 400px;
     top: calc(3rem + 50%);
     left: 50%;
     transform: translate(-50%, -50%);
     padding: 1rem;
     background: var(--colour-background);
+    border-radius: var(--border-radius);
 }
 
 .modal-content {
@@ -184,4 +182,13 @@ table {
 
 .modal--open {
     display: block;
+}
+
+.modal--open input {
+    margin-bottom: var(--spacing-half);
+    outline: none;
+    padding: var(--spacing);
+    border: var(--border-light);
+    font-size: var(--font);
+    border-radius: var(--border-radius);
 }

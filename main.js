@@ -20,123 +20,187 @@ var employeeData = [{
         Department: "Superhero",
     },
 ];
+//immediately invoking function expression so global scope isn't polluted
+const employees = (function () {
+    let controls,
+        niNumber = document.getElementById("niNumber"),
+        fullName = document.getElementById("fullName"),
+        phoneNumber = document.getElementById("phoneNumber"),
+        address = document.getElementById("address"),
+        department = document.getElementById("department"),
+        inputs = [niNumber, fullName, phoneNumber, address, department]; //puts the variables in an array so each can be referred to as an index
+    
+    function _setupControls() { //centralised object for mapping
+        controls = {
+            addEmployee: document.getElementById("addEmployee"),
+            addModal: document.getElementById("addModal"),
+            departmentSelect: document.getElementById("departmentSelect"),
+            saveEmployee: document.getElementById("saveEmployee"),
+            table: document.getElementById("employees")
+        };
+    }
 
-const employees = function () {
-    let controls;
-    let rowIndex = -1;
+    function _bindEvents() { //looks for clicks on add employee, and toggles the modal on and off
+        controls.addEmployee.addEventListener("click", () => {
+            _showHideModal();
+        });
+        controls.saveEmployee.addEventListener("click", () => { //looks for clicks when saving new employee
+            _saveEmployee();
+        });
 
-    function init() {
+        controls.departmentSelect.addEventListener("change", () => { //looks for whenever there is a change in the drop down bar
+            controls.table.querySelectorAll("tr").forEach(function (e) { //selects all the rows in the table
+                e.remove(); //and removes them
+            });
+            _setupTable(controls.departmentSelect.value); //shows whatever department is selected
+        });
+    }
+
+
+
+    function _setupActions(row) { //sets up the column for the edit and delete icons with their event listeners and modals
+        let actionColumn = document.createElement("td");
+
+        actionColumn.classList.add("actions");
+        actionColumn.innerHTML = `<span class='material-icons-outlined actionBtn deleteBtn'>delete</span>`;
+        actionColumn.innerHTML += `<span class='material-icons-outlined actionBtn editBtn'>edit</span>`;
+        row.appendChild(actionColumn);
+
+        actionColumn.querySelector(".deleteBtn").addEventListener("click", event => {
+            _removeRow(event);
+        });
+
+        actionColumn.querySelector(".editBtn").addEventListener("click", event => {
+            _showHideModal(event.target.closest("tr"));
+        });
+    }
+
+    function _removeRow(e) {
+        let row = e.target.closest("tr");
+
+        employeeData = employeeData.filter(employee => employee["NI Number"] !== row.cells[0].innerText); //NI no. used as unique identifier to remove a specific employee
+
+        row.remove(); 
+    }
+
+    function _setupFilterDepartments() {
+        const departments = [
+            ...new Set(employeeData.map((employee) => employee.Department)), //gets distinct departments from employee data to be used in drop down filter
+        ];
+
+        for (let index = 0; index < departments.length; index++) {
+            const department = departments[index];
+
+            controls.departmentSelect.innerHTML += `<option id="${department}" value="${department}">${department}</option`; //shows the department options in the drop down list without overriding
+        }
+    }
+
+    function _showHideModal(row) { //passes the row
+        if (row) {
+            for (const [index, cell] of [...row.cells].entries()) { //loops over all the data entries in the row
+                if (!cell.classList.contains("actions")) {
+                    inputs[index].value = cell.innerText; //populates the data fields in the modal with the employee info
+                }
+            }
+            row.classList.toggle("editing");
+            controls.saveEmployee.setAttribute('data-edit', 'true'); //used for when saving the employee
+        } else {
+            delete controls.saveEmployee.dataset.edit;
+        }
+
+        document.getElementById("addModal").classList.toggle("modal--open"); //toggles the modal
+    }
+
+    function _setupHeaders() { 
+        let headerRow = controls.table.insertRow(-1),
+            actionRow = document.createElement("th");
+        //dynamically creates headers
+        for (let key in employeeData[0]) {
+            let headerCell = document.createElement("th");
+            headerCell.innerHTML = key;
+            headerRow.appendChild(headerCell);
+        }
+
+        actionRow.classList.add("actions");
+        actionRow.innerHTML = "Actions";
+        headerRow.appendChild(actionRow);
+    }
+
+    function _init() { //function that's called as soon as the iife is invoked
         _setupControls();
         _bindEvents();
         _setupTable();
-    }
-    function _setupControls() {
-        controls = { //centralised object for mapping add employee and save employee
-            table: document.getElementById("employees"),
-            addEmployee: document.getElementById("addEmployee"),
-            saveEmployee: document.getElementById("saveEmployee"),
-        };
+        _setupFilterDepartments();
     }
 
-    function _bindEvents() {
-        // document.getElementbyId("addEmployee").addEventListener("click", _openAddEmployeeModal); 
-        controls.addEmployee.addEventListener("click", _openAddEmployeeModal);
+    function _setupTable(filter) {
+        let employees = employeeData;
 
-        controls.saveEmployee.addEventListener("click", _submitAddEmployeeModal);
-    }
+        _setupHeaders(); //creates table headers regardless of filter
 
-    
-    function _setupTable() {
-        let tr = controls.table.insertRow(rowIndex); //table row is made
-        let action = document.createElement("th"); //action needs to exist on every employee
-        rowIndex++;
-
-        for (let key in employeeData[0]) { //however many keys there are in the JSON object, create a table header and that table header should include the value 
-            let th = document.createElement("th");
-            th.innerHTML = key; 
-            tr.appendChild(th); //add the value into the table row
+        if (filter) { //filters based on department selected
+            employees = employeeData.filter(employee => employee.Department == filter)
         }
+        //creates all the table data using the employees
+        for (let i = 0; i < employees.length; i++) { 
+            let row = controls.table.insertRow();
 
-        action.classList.add("actions");
-        action.innerHTML = "Actions";
-        tr.appendChild(action);
-
-        for (let i = 0; i < employeeData.length; i++) { //for however many employees there are, creates a table data element
-            let row = controls.table.insertRow(++rowIndex);
-
-            for (var key in employeeData[i]) {
-                let td = document.createElement("td");
-                td.innerHTML = employeeData[i][key];
-                row.appendChild(td); //put the table data in the respective row
+            for (var key in employees[i]) { 
+                let dataCell = document.createElement("td");
+                dataCell.innerHTML = employees[i][key];
+                row.appendChild(dataCell); 
             }
 
-            _addActionButtons(row, rowIndex);
+            _setupActions(row);
         }
     }
 
-    function _deleteEmployee(index) {
-        employeeData.splice(index, 1); //deletes from the JSON object
-        rowIndex--;
+    function _saveEmployee() {
+        if (controls.saveEmployee.dataset.edit === "true") { //when saving an edited employee
 
-        var rowToDelete = document.getElementsByTagName("tr")[index]; //specifies a row to delete
-        rowToDelete.remove(); //directly removes the row
+            let row = document.getElementsByClassName("editing")[0];
+            //edits the cell data for said employee with the data entered in the modal
+            for (const [index, cell] of [...row.cells].entries()) {
+                if (!cell.classList.contains("actions")) {
+                    cell.innerText = inputs[index].value;
+                }
+            }
+
+            row.classList.remove("editing");
+        } else {
+            let employee = {};
+
+            for (const input of [...inputs]) {
+                employee[input.placeholder] = input.value;
+            }
+
+            employeeData.push(employee);
+            _addRow(employee);
+        }
+
+        document.getElementById("addModal").classList.toggle("modal--open");
+        delete controls.saveEmployee.dataset.edit;
     }
 
-    function _editEmployee(index) {
-        console.log(`Edit Employee ${index}`);
-    }
+    function _addRow(employee) {
+        let row = controls.table.insertRow(); 
 
-    function _addActionButtons(row, index) {
-        let action = document.createElement("td"), //creates table data tag
-            deleteID = `delete_${index}`,//IDs set based on the entry's index
-            editID = `edit_${index}`;
-
-        action.classList.add("actions"); //adding the CSS class since the entire table is populated in JS
-        action.innerHTML = `<span class='material-icons-outlined actionBtn' id="${deleteID}">delete</span>`; //uses google material icons for delete
-        action.innerHTML += `<span class='material-icons-outlined actionBtn' id="${editID}">edit</span>`; //the same as above, but for edit
-        row.appendChild(action);
-//Tells the JS to react to any clicks on the edit or delete icons
-        document.getElementById(deleteID).addEventListener("click", function() { _deleteEmployee(index)}); //calls delete employee function with whatever index from the JSON object
-        document.getElementById(editID).addEventListener("click", function() { _editEmployee(index)});
-    }
-
-    function _addRow(employee) { //puts a new row in and increments the index
-        let tr = controls.table.insertRow();
-        rowIndex++;
-    
         for (var key in employee) {
-            let td = document.createElement("td");
-            td.innerHTML = employee[key];
-            tr.appendChild(td);
+            let dataCell = document.createElement("td"); //for every key, make a new columm
+            dataCell.innerHTML = employee[key]; //in that column, put the value in
+            row.appendChild(dataCell); //data cell should be in that SAME row
         }
+        //rebuilds the drop down in case a new department is added
+        controls.departmentSelect.querySelectorAll("option").forEach(function (e) {
+            if (e.value !== "") {
+                e.remove();
+            }
+        });
 
-        _addActionButtons(tr, rowIndex); //creates new action buttons (edit and delete) for the new rows
+        _setupFilterDepartments();
+
+        _setupActions(row);
     }
 
-    function _submitAddEmployeeModal() {
-        document.getElementById("addModal").classList.toggle("modal--open"); 
-        
-        var employee = { //initialises input fields for new employee when modal is toggled
-            "NI Number": document.getElementsByName("NiNumber")[0].value,
-            "Full Name": document.getElementsByName("Full Name")[0].value,
-            "Phone Number": document.getElementsByName("Phone Number")[0].value,
-            Address: document.getElementsByName("Address")[0].value,
-            Department: document.getElementsByName("Department")[0].value,
-        };
-    
-        employeeData.push(employee);
-        _addRow(employee);
-    }
-
-    function _openAddEmployeeModal() {
-        let modal = document.getElementById("addModal");
-        // let blackout = document.getElementsByClassName("blackout")[0];
-        // let main = document.getElementsByClassName("main")[0];
-        // main.classList.add("main--blackout");
-        // blackout.classList.add("blackout--show");
-        modal.classList.toggle("modal--open");
-    }
-
-    init(); //Initialises all functions
-
-}();
+    _init();
+})();
